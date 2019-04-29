@@ -36,14 +36,9 @@ const Cell = styled.div`
   border: var(--color) 1px solid;
   border-top: dotted var(--color) 1px;
   border-bottom: 0px;
-  margin-top: -1px;
   writing-mode: vertical-rl;
   :nth-child(${rowNum}n + 1) {
     border-top: 0px;
-    /* 1px solid var(--color); */
-  }
-  :nth-child(${rowNum}n) {
-    border-bottom: 0px;
   }
   line-height: 2em;
   font-size: 22px;
