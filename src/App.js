@@ -71,14 +71,14 @@ const useInputState = (initValue) => {
   const cb = useChangeCallback(setState)
   return [state, cb]
 }
-const GenkoYoshi = ({ text, rowNum, onCellClick }) => {
+const GenkoYoshi = ({ text, rowNum, onCellClick, caretPoint }) => {
   const chars = useMemo(() => {
     const str = text.split("")
     const pad = rowNum - (str.length % rowNum)
     const padded = str.concat(Array.from({ length: pad }))
     return padded
   }, [text, rowNum])
-
+  console.log(caretPoint)
   return (
     <Outline>
       <Grid>
@@ -114,9 +114,17 @@ const ColorInput = ({ color, handleColor }) => (
 )
 
 const useFocusableTextarea = (initValue) => {
-  const [text, handleText] = useInputState(lorem)
+  const [text, handleText] = useInputState(initValue)
   const textAreaRef = useRef(null)
-  const onFocusWIthSelection = useCallback(
+  const caretPoint = ((textAreaRef) => {
+    // console.log("z")
+    // if (!textAreaRef.current) {
+    //   return
+    // }
+    // const textAreaDom = textAreaRef.current
+    // return textAreaDom.selection
+  })(textAreaRef)
+  const onFocusWithSelection = useCallback(
     (targetNum) => {
       if (!textAreaRef.current) {
         return
@@ -133,7 +141,8 @@ const useFocusableTextarea = (initValue) => {
     text,
     handleText,
     textAreaRef,
-    onFocusWIthSelection
+    caretPoint,
+    onFocusWithSelection
   }
 }
 
@@ -142,7 +151,8 @@ function App() {
     text,
     handleText,
     textAreaRef,
-    onFocusWIthSelection: onFocusWithSelection
+    caretPoint,
+    onFocusWithSelection
   } = useFocusableTextarea(lorem)
   const [color, handleColor] = useInputState("#d2a7a4")
   const [rowNum, handleRowNum] = useInputState(10)
@@ -160,6 +170,7 @@ function App() {
       <GenkoYoshi
         text={text}
         rowNum={rowNum}
+        caretPoint={caretPoint}
         onCellClick={onFocusWithSelection}
       />
       <a href="https://github.com/terrierscript/grid-genko-yoshi">
