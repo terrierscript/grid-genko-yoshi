@@ -1,10 +1,9 @@
 import React, { useState, useMemo, useCallback } from "react"
 import styled from "styled-components"
 
-const rowNum = 10
 const Body = styled.div`
   --color: ${({ color }) => color};
-  --row-num: ${rowNum};
+  --row-num: ${({ rowNum }) => rowNum};
   --w: 3em;
 `
 
@@ -53,30 +52,40 @@ const TextArea = styled.textarea`
   height: 5em;
 `
 
-const useChangeCallback = (set) =>
+const useChangeCallback = (onChange) =>
   useCallback(
     (e) => {
-      set(e.target.value)
+      onChange(e.target.value)
     },
-    [set]
+    [onChange]
   )
 
 function App() {
   const [text, setText] = useState(lorem)
   const [color, setColor] = useState("#d2a7a4")
+  const [rowNum, setRowNum] = useState(10)
   const handleText = useChangeCallback(setText)
   const handleColor = useChangeCallback(setColor)
+  const handleRowNum = useChangeCallback(setRowNum)
   const chars = useMemo(() => {
     const str = text.split("")
     const pad = rowNum - (str.length % rowNum)
     return str.concat(Array.from({ length: pad }))
-  }, [text])
+  }, [text, rowNum])
 
   return (
-    <Body color={color}>
+    <Body color={color} rowNum={rowNum}>
       <div>
         <TextArea onChange={handleText} value={text} />
-        <input type="color" value={color} onChange={handleColor} />
+        <label>
+          color:
+          <input type="color" value={color} onChange={handleColor} />
+        </label>
+
+        <label>
+          rowNum:
+          <input type="number" value={rowNum} onChange={handleRowNum} />
+        </label>
       </div>
 
       <Outline>
