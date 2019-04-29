@@ -3,7 +3,7 @@ import styled from "styled-components"
 
 const rowNum = 10
 const Body = styled.div`
-  --color: #d2a7a4;
+  --color: ${({ color }) => color};
   --row-num: ${rowNum};
   --w: 3em;
 `
@@ -55,16 +55,24 @@ const TextArea = styled.textarea`
 
 function App() {
   const [state, setState] = useState(lorem)
+  const [color, setColor] = useState("#d2a7a4")
   const chars = useMemo(() => {
     const str = state.split("")
-    const r = rowNum - (str.length % rowNum)
-    return str.concat(Array.from({ length: r }))
+    const pad = rowNum - (str.length % rowNum)
+    return str.concat(Array.from({ length: pad }))
   }, [state])
+
   return (
-    <Body>
+    <Body color={color}>
       <div>
         <TextArea onChange={(e) => setState(e.target.value)} value={state} />
+        <input
+          type="color"
+          value={color}
+          onChange={(e) => setColor(e.target.value)}
+        />
       </div>
+
       <Outline>
         <Grid>
           {chars.map((c, key) => (
@@ -72,6 +80,9 @@ function App() {
           ))}
         </Grid>
       </Outline>
+      <a href="https://github.com/terrierscript/grid-genko-yoshi">
+        Source Code
+      </a>
     </Body>
   )
 }
