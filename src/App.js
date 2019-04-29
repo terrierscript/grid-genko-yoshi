@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useCallback } from "react"
 import styled from "styled-components"
 
 const rowNum = 10
@@ -53,24 +53,30 @@ const TextArea = styled.textarea`
   height: 5em;
 `
 
+const useChangeCallback = (set) =>
+  useCallback(
+    (e) => {
+      set(e.target.value)
+    },
+    [set]
+  )
+
 function App() {
-  const [state, setState] = useState(lorem)
+  const [text, setText] = useState(lorem)
   const [color, setColor] = useState("#d2a7a4")
+  const handleText = useChangeCallback(setText)
+  const handleColor = useChangeCallback(setColor)
   const chars = useMemo(() => {
-    const str = state.split("")
+    const str = text.split("")
     const pad = rowNum - (str.length % rowNum)
     return str.concat(Array.from({ length: pad }))
-  }, [state])
+  }, [text])
 
   return (
     <Body color={color}>
       <div>
-        <TextArea onChange={(e) => setState(e.target.value)} value={state} />
-        <input
-          type="color"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
-        />
+        <TextArea onChange={handleText} value={text} />
+        <input type="color" value={color} onChange={handleColor} />
       </div>
 
       <Outline>
