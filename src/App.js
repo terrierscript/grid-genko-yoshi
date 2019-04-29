@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react"
+import React, { useState, useMemo, useCallback, createRef, useRef } from "react"
 import styled from "styled-components"
 
 const Body = styled.div`
@@ -48,8 +48,14 @@ const Cell = styled.div`
 const lorem =
   "依然として速度を増しながら進むにつれて、夜と日中の切り替わりが曖昧になり、一続きの灰色になった。空は深い青色で夕暮れ時のような明るい光で照らされている。急に現れる太陽はきらめく円弧の形をした光の筋となった。月はおぼろげに揺らぐ帯となり、星は見えなかった。ただ、時折青い空に明るく瞬く円が見えた。"
 
-const TextArea = styled.textarea`
+const TextAreaWrapper = styled.div`
+  /* writing-mode: vertical-rl; */
+`
+const TextAreaItem = styled.textarea`
   height: 5em;
+  /* writing-mode: initial;
+  transform: rotate(90deg);
+  transform-origin: top left; */
 `
 
 const useChangeCallback = (onChange) =>
@@ -60,41 +66,102 @@ const useChangeCallback = (onChange) =>
     [onChange]
   )
 
-function App() {
-  const [text, setText] = useState(lorem)
-  const [color, setColor] = useState("#d2a7a4")
-  const [rowNum, setRowNum] = useState(10)
-  const handleText = useChangeCallback(setText)
-  const handleColor = useChangeCallback(setColor)
-  const handleRowNum = useChangeCallback(setRowNum)
+const useInputState = (initValue) => {
+  const [state, setState] = useState(initValue)
+  const cb = useChangeCallback(setState)
+  return [state, cb]
+}
+const GenkoYoshi = ({ text, rowNum, onCellClick }) => {
   const chars = useMemo(() => {
     const str = text.split("")
     const pad = rowNum - (str.length % rowNum)
-    return str.concat(Array.from({ length: pad }))
+    const padded = str.concat(Array.from({ length: pad }))
+    return padded
   }, [text, rowNum])
 
   return (
+    <Outline>
+      <Grid>
+        {chars.map((c, key) => (
+          <Cell key={key} onClick={() => onCellClick(key)}>
+            {c}
+          </Cell>
+        ))}
+      </Grid>
+    </Outline>
+  )
+}
+
+const TextArea = ({ text, handleText, textAreaRef }) => {
+  return (
+    <TextAreaWrapper>
+      <TextAreaItem ref={textAreaRef} onChange={handleText} value={text} />
+    </TextAreaWrapper>
+  )
+}
+const RowNumInput = ({ rowNum, handleRowNum }) => (
+  <label>
+    rowNum:
+    <input type="number" value={rowNum} onChange={handleRowNum} />
+  </label>
+)
+
+const ColorInput = ({ color, handleColor }) => (
+  <label>
+    color:
+    <input type="color" value={color} onChange={handleColor} />
+  </label>
+)
+
+const useFocusableTextarea = (initValue) => {
+  const [text, handleText] = useInputState(lorem)
+  const textAreaRef = useRef(null)
+  const onFocusWIthSelection = useCallback(
+    (targetNum) => {
+      if (!textAreaRef.current) {
+        return
+      }
+      const textAreaDom = textAreaRef.current
+      textAreaDom.focus()
+      const selectionPoint = targetNum + 1
+      textAreaDom.selectionStart = selectionPoint
+      textAreaDom.selectionEnd = selectionPoint
+    },
+    [textAreaRef]
+  )
+  return {
+    text,
+    handleText,
+    textAreaRef,
+    onFocusWIthSelection
+  }
+}
+
+function App() {
+  const {
+    text,
+    handleText,
+    textAreaRef,
+    onFocusWIthSelection: onFocusWithSelection
+  } = useFocusableTextarea(lorem)
+  const [color, handleColor] = useInputState("#d2a7a4")
+  const [rowNum, handleRowNum] = useInputState(10)
+  return (
     <Body color={color} rowNum={rowNum}>
       <div>
-        <TextArea onChange={handleText} value={text} />
-        <label>
-          color:
-          <input type="color" value={color} onChange={handleColor} />
-        </label>
-
-        <label>
-          rowNum:
-          <input type="number" value={rowNum} onChange={handleRowNum} />
-        </label>
+        <TextArea
+          text={text}
+          handleText={handleText}
+          textAreaRef={textAreaRef}
+        />
+        <RowNumInput rowNum={rowNum} handleRowNum={handleRowNum} />
+        <ColorInput color={color} handleColor={handleColor} />
       </div>
-
-      <Outline>
-        <Grid>
-          {chars.map((c, key) => (
-            <Cell key={key}>{c}</Cell>
-          ))}
-        </Grid>
-      </Outline>
+      <GenkoYoshi
+        text={text}
+        rowNum={rowNum}
+        onCellClick={onFocusWithSelection}
+      />
       <a href="https://github.com/terrierscript/grid-genko-yoshi">
         Source Code
       </a>
