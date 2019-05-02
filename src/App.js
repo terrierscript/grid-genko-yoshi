@@ -35,7 +35,7 @@ const Cell = styled.div`
   border: var(--color) 1px solid;
   border-top: dotted var(--color) 1px;
   border-bottom: 0px;
-  writing-mode: vertical-rl;
+  text-orientation: upright;
   margin-top: -1px;
   line-height: 2em;
   font-size: 22px;
